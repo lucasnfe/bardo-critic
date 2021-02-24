@@ -1,0 +1,20 @@
+
+.hidden-text {
+    /* color: rgba(0, 0, 0, 0); */
+    visibility: hidden;
+}
+
+.highlighted-text {
+    /* color: rgba(0, 0, 0, 1.0); */
+    visibility: visible;
+    animation: blinker 2s linear infinite;
+}
+
+.showed-text {
+    /* color: rgba(0, 0, 0, 1.0); */
+    visibility: visible;
+}
+
+@keyframes blinker {
+  50% { opacity: 0; }
+}

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Local CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+    <!-- Load external libs -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <title>SBBS</title>
+  </head>
+
+  <body onload="main()">
+
+  <div class="p-1"></div>
+
+  <div class="card bg-white text-dark border rounded">
+      <div class="card-header border-0 bg-primary"></div>
+
+      <div class="card-body mx-2">
+          <h2 class="font-weight-normal">Music Generation with Emotion Experiment</h2>
+
+          <small>Welcome to the Music Generation with Emotion Experiment!
+
+          <p class="m-0 p-0 bold"><strong>PLEASE READ THE FOLLOWING INFORMATION CAREFULLY BEFORE PROCEEDING.</strong></p>
+          <br>
+
+          <p class="m-0 p-0 bold"><strong>WHO WE ARE:</strong><br>
+          We are Computer Science researchers at UNIVERSITY OF CALIFORNIA, SANTA CRUZ.</p><br>
+
+
+          <p class="m-0 p-0 bold"><strong>WHY WE ARE DOING THIS RESEARCH:</strong><br>
+          We are performing this experiment to test our new Artificial Intelligence (AI) method to automatically generate piano pieces with a given emotion.<br>
+          </p><br>
+
+          <p class="m-0 p-0 bold"><strong>WHAT YOU WILL HAVE TO DO:</strong><br>
+          In this experiment you will have to listen to a sequence of 5 piano pieces. Each piece has a single emotion transition. After listening to each piece,
+          you will evaluate:
+          </p>
+
+          <ol class="mx-2 p-2">
+              <li>The emotions perceived before and after the transition in that piece.</li>
+              <li>The compositional quality of that piece. </li>
+          </ol>
+
+          <p class="m-0 p-0 bold"><strong>PRIVACY AND DATA COLLECTION:</strong><br>
+          We will not ask you for your name or your identity.
+          </p><br>
+
+          <p class="m-0 p-0 bold"><strong>DURATION:</strong><br>
+          You will evaluate 5 piano pieces in total. Each piece is approximately 30 seconds long. The entire experiment takes approximately 10 MINUTES.
+          </p><br>
+
+          <p class="m-0 p-0 bold"><strong>NOTES:</strong><br>
+          We strongly recommend the use of headphones in this experiment.
+          </p></small>
+      </div>
+    </div>
+
+    <form action="http://localhost:5000/tutorial" method="GET">
+        <div class="row align-items-center mt-2 mb-2">
+          <div class="col-4">
+              <!-- <button id="prevButton" type="button" class="btn-page btn border rounded bg-white" onclick="prevPage()">Back</button> -->
+              <button id="nextButton" type="submit" class="btn-page btn border bg-white rounded">Next</button>
+          </div>
+
+          <div class="col">
+              <div class="row align-items-center justify-content-end">
+                  <div class="col">
+                      <div id="ppage-back" class="progress bg-secondary" style="height: 10px;">
+                        <div id="ppage" class="progress-bar" role="progressbar" style="width: {{ (1/(total_pieces + 2))*100 }}%" aria-valuenow="1"  aria-valuemin="1" aria-valuemax="{{ total_pieces + 2 }}"></div>
+                      </div>
+                 </div>
+
+                 <div class="col-6">
+                      <label id="npage">Page 1 of {{ total_pieces + 2 }}</label>
+                  </div>
+              </div>
+          </div>
+        </div>
+    </form>
+
+    <div class="p-4"></div>
+  </body>
+
+  <script>
+    function main() {
+        localStorage.clear();
+
+        let pieceSequence = "{{piece_sequence}}".split(",");
+        for(let i = 0; i < pieceSequence.length; i++) {
+            localStorage.setItem("piece" + i, pieceSequence[i]);
+        }
+    }
+  </script>
+</html>

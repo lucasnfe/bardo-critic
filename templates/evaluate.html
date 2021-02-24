@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/css/bootstrap-select.min.css">
+
+    <!-- Local CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/player.css') }}" rel="stylesheet">
+
+    <!-- Load external libs -->
+    <script src="{{ url_for('static', filename='js/lib/howler.js') }}"></script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"></script>
+
+    <title>SBBS</title>
+  </head>
+
+  <body onload="onEvaluateLoad()" onresize="onResize()">
+      <div class="p-1"></div>
+
+      <div class="card bg-white text-dark border rounded">
+          <div class="card-header border-0 bg-primary"></div>
+
+          <div class="card-body mx-2">
+            <h2 class="font-weight-normal">Music Generation with Emotion Experiment</h2>
+            <sup class="required">* Required</sup>
+          </div>
+      </div>
+
+      <div class="p-1"></div>
+
+      <div class="card bg-white border rounded">
+          <div class="card-body mx-2">
+            <small>
+
+              <h6 id="piece-intro">Piece #piece_number has a transition from one emotion to another.
+              Listen to this piece and select the emotion transition you perceive:</h6>
+
+              <ol class="mx-2 p-2">
+                  <li>Press the "Play" button to listen to the piece (listen until the end). </li>
+                  <li>With the audio paused:</li>
+                  <ul class="mx-3 px-1">
+                    <li>Drag and drop the slider to (or click on) the location where you perceived the emotion transition.</li>
+                    <li>Select the emotions you perceived in each part. If you don't perceived an emotion transition, select the same emotion in both parts.</li>
+                  </ul>
+                  <li>Rewind the audio and repeat steps 1. and 2. until the emotion transition is in the desired location.</li>
+              </ol>
+            </small>
+          </div>
+      </div>
+
+      <div class="p-1"></div>
+
+        <form id="evaluate-form" class="needs-validation" action="" method="GET">
+
+          <div class="card bg-white border rounded">
+              <div class="card-body mx-2">
+                <small>
+                    <h6 id="piece-title">Piece #piece_number <sup class="required">*</sup></h6>
+
+                    <div class="row align-items-center">
+                      <!-- Controls -->
+                      <div class="col-1">
+                          <button id="playButton" type="button" class="btn btn-light btn-sm" data-toggle="popover" data-trigger="manual"  data-content="Make sure to listen to the piece entirely at least once." data-placement="bottom" onclick="onPlayButtonPlayed()">
+                              <img id="playButtonImg" src="{{ url_for('static', filename='imgs/play-64x64.png') }}" class="img-fluid">
+                              <span id="loadingSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                          </button>
+                      </div>
+
+                      <!-- Progres bar -->
+                      <div class="col-8">
+                        <div id="emotion-slider">
+                          <div id="emotion-slider-thumb"></div>
+                          <div id="emotion-track-left" class="emotion-track"></div>
+                          <div id="emotion-track-right" class="emotion-track"></div>
+                        </div>
+                      </div>
+
+                      <!-- Timer -->
+                      <div class="col-2">
+                          <div id="timer">0:00</div>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-1">
+                            <!-- <div>Emotion Transition:</div> -->
+                        </div>
+
+                        <!-- Progres bar -->
+                        <div class="col-8">
+                            <div class="row align-items-center text-center">
+                                <div class="col">
+                                    <select name="emotion1_{{piece_number}}" id="emotion1" class="selectpicker form-control" data-dropup-auto="false" data-width="120px" data-style="btn-transparent" required>
+                                        <option value="" selected="selected" disabled="disabled">Emotion 1</option>
+                                        <option data-content="<span class='badge op-calm'>Calm</span>" class="op" value="1">Calm</option>
+                                        <option data-content="<span class='badge op-agitated'>Agitated</span>" class="op" value="2">Agitated</option>
+                                        <option data-content="<span class='badge op-happy'>Happy</span>" class="op" value="3">Happy</option>
+                                        <option data-content="<span class='badge op-suspense'>Suspense</span>" class="op" value="4">Suspense</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <select name="emotion2_{{piece_number}}" id="emotion2" class="selectpicker" data-dropup-auto="false" data-width="120px" data-style="btn-transparent" required>
+                                        <option  value="" selected="selected" disabled="disabled">Emotion 2</option>
+                                        <option data-content="<span class='badge op-calm'>Calm</span>" class="op" value="1">Calm</option>
+                                        <option data-content="<span class='badge op-agitated'>Agitated</span>" class="op" value="2">Agitated</option>
+                                        <option data-content="<span class='badge op-happy'>Happy</span>" class="op" value="3">Happy</option>
+                                        <option data-content="<span class='badge op-suspense'>Suspense</span>" class="op" value="4">Suspense</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-2"></div>
+                    </div>
+                </small>
+              </div>
+          </div>
+
+          <div class="p-1"></div>
+
+          <div class="card bg-white border rounded">
+              <div class="card-body mx-2">
+                <small>
+                  <label for="quality_{{piece_number}}"><h6>How good does this piece sound? <sup class="required">*</sup></h6>
+                      Evaluate the quality of the composition and not the quality of the audio/performance.
+                  </label>
+
+                  <div class="btn-toolbar" role="toolbar" >
+                    <div class="btn-group" role="group" >
+                      <a class="btn btn-link disabled" disabled>Very bad</a>
+                      <div class="form-check form-check-inline">
+                        <input class="evaluate-quality form-check-input" type="radio" name="quality_{{piece_number}}" value="1" required>
+                        <label class="form-check-label" for="inlineRadio1">1</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="evaluate-quality form-check-input" type="radio" name="quality_{{piece_number}}" value="2" required>
+                        <label class="form-check-label" for="inlineRadio2">2</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="evaluate-quality form-check-input" type="radio" name="quality_{{piece_number}}" value="3" required>
+                        <label class="form-check-label" for="6">3</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="evaluate-quality form-check-input" type="radio" name="quality_{{piece_number}}" value="4" required>
+                        <label class="form-check-label" for="inlineRadio3">4</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="evaluate-quality form-check-input" type="radio" name="quality_{{piece_number}}" value="5" required>
+                        <label class="form-check-label" for="inlineRadio3">5</label>
+                      </div>
+                      <a class="btn btn-link disabled" disabled>Very good</a>
+                    </div>
+                  </div>
+                </small>
+              </div>
+          </div>
+
+          <div class="row align-items-center mt-2 mb-2">
+            <div class="col-4">
+                <button id="prevButton" type="button" class="btn-page btn border rounded bg-white" onclick="onBack()">Back</button>
+                <button id="nextButton" type="submit" class="btn-page btn border bg-white rounded">Next</button>
+            </div>
+
+            <div class="col">
+                <div class="row align-items-center justify-content-end">
+                    <div class="col">
+                        <div id="ppage-back" class="progress bg-secondary" style="height: 10px;">
+                          <div id="ppage" class="progress-bar" role="progressbar" style="width: {{ (3/(total_pieces + 2))*100 }}%" aria-valuenow="3"  aria-valuemin="1" aria-valuemax="{{ total_pieces + 2 }}"></div>
+                        </div>
+                   </div>
+
+                   <div class="col-6">
+                        <label id="npage">Page #page_number of {{ total_pieces + 2 }}</label>
+                    </div>
+                </div>
+            </div>
+          </div>
+      </form>
+
+      <div class="p-4"></div>
+  </body>
+
+  <!-- Load player js -->
+  <script src="{{ url_for('static', filename='js/evaluate.js') }}"></script>
+
+  <script>
+      let emotion1Key = "emotion1_" + {{piece_number}};
+      let emotion2Key = "emotion2_" + {{piece_number}};
+      let qualityKey = "quality_" + {{piece_number}};
+      let pKey = "p_" + {{piece_number}};
+      let playCountKey = "playCount_" + {{piece_number}};
+      let playCompleteCountKey = "playCompleteCount_" + {{piece_number}};
+
+      function getHowlerAudio() {
+          return "{{ url_for('static', filename=piece_name) }}";
+      }
+
+      function setPlayImg() {
+          playButtonImg.src = "{{ url_for('static', filename='imgs/pause-64x64.png') }}";
+      }
+
+      function setPauseImg() {
+          playButtonImg.src = "{{ url_for('static', filename='imgs/play-64x64.png') }}";
+      }
+
+      function loadEmotionSelect(emotionKey) {
+          let emotionValue = localStorage.getItem(emotionKey);
+          if(emotionValue != null) {
+              // Populate field with data
+              $('[name="' + emotionKey + '"]').val(emotionValue);
+              $('[name="' + emotionKey + '"]').change();
+          }
+      }
+
+      function loadEmotionSlider() {
+          let pValue = localStorage.getItem(pKey);
+          if(pValue != null) {
+              updateProgressBar(parseFloat(pValue));
+              onEmotionButtonPlayed();
+          }
+      }
+
+      function loadQualityLikert() {
+          let qualityValue = localStorage.getItem(qualityKey);
+          if(qualityValue != null) {
+              $('[name="' + qualityKey + '"]').val([parseInt(qualityValue)]);
+          }
+      }
+
+      function loadPlayCount() {
+          let playCountValue = localStorage.getItem(playCountKey);
+          if(playCountValue != null) {
+              playCount = parseInt(playCountValue);
+          }
+
+          let playCompleteCountValue = localStorage.getItem(playCompleteCountKey);
+          if(playCompleteCountValue != null) {
+              playCompleteCount = parseInt(playCompleteCountValue);
+          }
+      }
+
+      function loadPieceTitle() {
+          let piece_ix = parseInt(localStorage.getItem("next_piece"));
+
+          let pieceIntro = document.getElementById("piece-intro");
+          pieceIntro.innerHTML = pieceIntro.innerHTML.replace("#piece_number", piece_ix);
+
+          let pieceTitle = document.getElementById("piece-title");
+          pieceTitle.innerHTML = pieceTitle.innerHTML.replace("#piece_number", piece_ix);
+      }
+
+      function loadFormAction() {
+          let totalPieces = {{ total_pieces }};
+
+          // Set the form action
+          let piece_ix = parseInt(localStorage.getItem("next_piece"));
+          let piece_number = localStorage.getItem("piece" + (piece_ix + 1));
+
+          if(piece_ix < totalPieces - 1) {
+              document.getElementById("evaluate-form").action = "http://localhost:5000/evaluate/" + piece_number;
+          }
+          else {
+              document.getElementById("evaluate-form").action = "http://localhost:5000/profile";
+          }
+      }
+
+      function loadPagingProgress() {
+          let totalPieces = {{ total_pieces }};
+
+          let piece_ix = parseInt(localStorage.getItem("next_piece"));
+          let pageNumber = piece_ix + 2;
+
+          // Set progress bar
+          document.getElementById("ppage").style.width = ((pageNumber/(totalPieces + 2))*100) + "%";
+
+          let nPage = document.getElementById("npage");
+          nPage.innerHTML = nPage.innerHTML.replace("#page_number", pageNumber);
+      }
+
+      function loadStoredEvaluation() {
+          loadEmotionSelect(emotion1Key);
+          loadEmotionSelect(emotion2Key);
+          loadEmotionSlider();
+          loadQualityLikert();
+      }
+
+      function onBack() {
+          // Set piece index
+          let piece_ix = parseInt(localStorage.getItem("next_piece"));
+          localStorage.setItem("next_piece", piece_ix - 1);
+
+          history.back();
+      }
+
+      $(document).on('submit', '#evaluate-form', function(ev) {
+          // Pause piece
+          pause();
+
+          // Set piece index
+          let piece_ix = parseInt(localStorage.getItem("next_piece"));
+          localStorage.setItem("next_piece", piece_ix + 1);
+
+          localStorage.setItem(emotion1Key, $("#emotion1").val());
+          localStorage.setItem(emotion2Key, $("#emotion2").val());
+          localStorage.setItem(qualityKey, $('[name="' + qualityKey + '"]:checked').val());
+          localStorage.setItem(pKey, thumbSavedPos);
+          localStorage.setItem(playCountKey, playCount);
+          localStorage.setItem(playCompleteCountKey, playCompleteCount);
+      });
+  </script>
+</html>

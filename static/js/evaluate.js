@@ -2,9 +2,11 @@
 let sound = null;
 
 // Controls
+let transPos = 0;
 let thumbPos = 0;
-let thumbSavedPos = 0;
+
 let didClickOnThumb = false;
+let didClickOnTrans = false;
 
 // Keep track of how many times the user pressed play
 let playCount = 0;
@@ -12,9 +14,16 @@ let playCompleteCount = 0;
 
 const slider = $("#emotion-slider");
 const thumb  = $("#emotion-slider-thumb");
+const trans  = $("#emotion-trans-slider-thumb");
+
+const transTimer = $("#emotion-trans-timer");
+const durationTimer = $("#duration");
+const elapsedTimer = $("#timer");
 
 const leftTrack = $('#emotion-track-left');
 const rightTrack = $('#emotion-track-right');
+
+const qualityLikert = $(".evaluate-quality");
 
 thumb.on("mousedown", function(ev) {
     thumbDown();
@@ -24,31 +33,64 @@ thumb.on("touchstart", function(ev) {
     thumbDown();
 });
 
+trans.on("mousedown", function(ev) {
+    transDown();
+});
+
+trans.on("touchstart", function(ev) {
+    transDown();
+});
+
 $(document).on("mousemove", function(ev) {
     thumbMove(ev.clientX);
+    transMove(ev.clientX);
 });
 
 $(document).on("touchmove", function(ev) {
-    if(didClickOnThumb) {
+    if(didClickOnThumb || didClickOnTrans) {
         ev.preventDefault();
     }
 
     var touches = ev.changedTouches;
     for (let i = 0; i < touches.length; i++) {
         thumbMove(touches[i].pageX);
+        transMove(touches[i].pageX);
     }
 });
 
 $(document).on("mouseup", function(ev) {
     thumbUp();
+    transUp();
 });
 
 $(document).on("touchend", function(ev) {
     thumbUp();
+    transUp();
 });
 
 $(document).on("touchcancel", function(ev) {
     thumbUp();
+    transUp();
+});
+
+qualityLikert.on('click', function(ev){
+    if(playCompleteCount == 0) {
+        ev.preventDefault();
+
+        // Pause the piece
+        pause();
+
+        // Show play popover
+        $("#playButton").popover('show');
+    }
+});
+
+leftTrack.on("mousedown", function(ev) {
+    trackDown(ev);
+});
+
+rightTrack.on("mousedown", function(ev) {
+    trackDown(ev);
 });
 
 $('#emotion1').on('hide.bs.select', function (e, clickedIndex, isSelected, previousValue) {
@@ -83,33 +125,13 @@ $('#emotion2').on('hide.bs.select', function (e, clickedIndex, isSelected, previ
     }
 });
 
-$(".evaluate-quality").on('click', function(ev){
-    if(playCompleteCount == 0) {
-        ev.preventDefault();
-
-        // Pause the piece
-        pause();
-
-        // Show play popover
-        $("#playButton").popover('show');
-    }
-});
-
-slider.on("mousedown", function(ev) {
+function transDown() {
     if(sound.state() != "loaded") {
         return;
     }
 
-    if(!didClickOnThumb && playCompleteCount > 0) {
-        pause();
-
-        // Calculate mid point
-        let p = calcMidPoint(ev.clientX);
-
-        // Update thumb position
-        updateProgressBar(p);
-    }
-});
+    didClickOnTrans = true;
+}
 
 function thumbDown() {
     if(sound.state() != "loaded") {
@@ -120,6 +142,21 @@ function thumbDown() {
     pause();
 }
 
+function transMove(clientX) {
+    if(sound.state() != "loaded") {
+        return;
+    }
+
+    if(didClickOnTrans && playCompleteCount > 0) {
+        // Calculate mid point
+        let p = calcMidPoint(clientX, trans.width(), transLimit);
+
+        // Update thumb position
+        updateTrans(p);
+        transTimer.css("visibility", "visible");
+    }
+}
+
 function thumbMove(clientX) {
     if(sound.state() != "loaded") {
         return;
@@ -127,11 +164,22 @@ function thumbMove(clientX) {
 
     if(didClickOnThumb) {
         // Calculate mid point
-      	let p = calcMidPoint(clientX);
+      	let p = calcMidPoint(clientX, thumb.width(), thumbLimit);
 
         // Update thumb position
         updateProgressBar(p);
     }
+}
+
+function transUp() {
+    if(sound.state() != "loaded") {
+        return;
+    }
+
+    didClickOnTrans = false;
+
+    // Hide trans timer
+    transTimer.css("visibility", "hidden");
 }
 
 function thumbUp() {
@@ -142,12 +190,20 @@ function thumbUp() {
     didClickOnThumb = false;
 }
 
-function calcMidPoint(clientX) {
-    // Calculate mid point
-    let x = clientX - thumb.width()/2;
-    let p = (x - limitX0 - sliderPaddingLeft)/sliderLimit;
+function trackDown(ev) {
+    if(sound.state() != "loaded") {
+        return;
+    }
 
-    return p;
+    if(!didClickOnThumb && playCompleteCount > 0) {
+        pause();
+
+        // Calculate mid point
+        let p = calcMidPoint(ev.clientX, thumb.width(), thumbLimit);
+
+        // Update thumb position
+        updateProgressBar(p);
+    }
 }
 
 function switchSelect(select, track) {
@@ -211,28 +267,44 @@ function onPlayButtonPlayed() {
     }
 }
 
+function onEmotionButtonPlayed() {
+    switchSelect(emotion1, leftTrack);
+    switchSelect(emotion2, rightTrack);
+
+    pause();
+}
+
 function updateEmotionSlider(p) {
     leftTrack.css("width", (p * 100) + "%");
     rightTrack.css("width", ((1.0 - p) * 100) + "%");
 }
 
-function onEmotionButtonPlayed() {
-    updateEmotionSlider(thumbPos);
+// Updates
+function updateTimer(timerElement, p) {
+    if(p >= 0 && p <= 1.0) {
+        let time = formatTime(Math.round(p * sound.duration()));
+        timerElement.html(time);
+    }
+}
 
+function updateTrans(p) {
+    // Compute seek position
+    transPos = clamp(p, 0.0, 1.0);
+
+    // Update track widths
+    updateEmotionSlider(transPos);
+
+    // Update track colors
     switchSelect(emotion1, leftTrack);
     switchSelect(emotion2, rightTrack);
 
-    pause();
+    // Update trans position
+    setTransPosition(transPos);
 
-    // Save current thumb pos
-    thumbSavedPos = thumbPos;
-}
+    // Update trans timer
+    updateTimer(transTimer, transPos);
 
-// Updates
-function updateTimer(p) {
-    if(p >= 0 && p <= 1.0) {
-        timer.innerHTML = formatTime(Math.round(p * sound.duration()));
-    }
+    trans.css("visibility", "visible");
 }
 
 function updateProgressBar(p) {
@@ -245,8 +317,8 @@ function updateProgressBar(p) {
         sound.seek(seek);
     }
 
-    // Update thumb
-    thumb.css("left", (limitX2 + thumbPos * sliderLimit) + "px");
+    // Update thumb position
+    setThumbPosition(thumbPos);
 
     if(playCompleteCount == 0) {
         thumb.css("visibility", "hidden");
@@ -256,7 +328,7 @@ function updateProgressBar(p) {
     }
 
     // Update timer
-    updateTimer(thumbPos);
+    updateTimer(elapsedTimer, thumbPos);
 }
 
 function onEvaluateLoad() {
@@ -267,7 +339,7 @@ function onEvaluateLoad() {
     loadPagingProgress();
 
     // Disable play button until sound has been loaded
-    $("#playButton" ).prop("disabled", true);
+    $("#playButton").prop("disabled", true);
 
     // Howl object
     sound = new Howl({
@@ -275,6 +347,8 @@ function onEvaluateLoad() {
       html5: true,
       onload: function() {
           onResize();
+
+          updateTimer(durationTimer, 1.0);
 
           $("#loadingSpinner").css("visibility", "hidden");
           $("#playButtonImg").css("display", "inline");
@@ -287,26 +361,54 @@ function onEvaluateLoad() {
           requestAnimationFrame(step);
       },
       onend: function() {
+          if(playCompleteCount == 0) {
+            updateTrans(0.5);
+          }
+
           playCompleteCount += 1;
+
+          updateEmotionSlider(transPos);
           updateProgressBar(0.0);
+
           pause();
       }
     });
 }
 
+function calcMidPoint(x, width, limit) {
+    return (x - limitX0)/limit;
+}
+
+function setThumbPosition(p) {
+    thumb.css("left", (limitX1 + p * thumbLimit - thumb.width()/2) + "px");
+}
+
+function setTransPosition(p) {
+    transTimer.css("left", (limitX1 + p * transLimit - transTimer.width()/2) + "px");
+    trans.css("left", (limitX1 + p * transLimit - trans.width()/2) + "px");
+}
+
 function onResize() {
     sliderPaddingLeft = parseInt(slider.css("padding-left").split("px")[0]);
-    sliderLimit = slider.width() - thumb.width()/2;
 
-    limitX0 = slider.offset().left;
+    thumbLimit = slider.width() - thumb.width()/2;
+    transLimit = slider.width() - trans.width()/2;
+
+    // Compute slider limits
+    limitX0 = slider.offset().left + sliderPaddingLeft;
     limitY0 = slider.offset().top;
-    limitX1 = limitX0 + sliderLimit;
-    limitX2 = slider.position().left + sliderPaddingLeft;
 
-    thumb.css("left", (limitX2 + thumbPos * sliderLimit) + "px");
+    // Compute slider init position
+    limitX1 = slider.position().left + sliderPaddingLeft;
 
-    thumb.draggable({axis: "x", containment: [limitX0 + sliderPaddingLeft, limitY0,
-                                              limitX1 + sliderPaddingLeft, limitY0]});
+    setThumbPosition(thumbPos);
+    setTransPosition(transPos);
+
+    thumb.draggable({axis: "x", containment: [limitX0 - thumb.width()/2, limitY0,
+                                              limitX0 + thumbLimit, limitY0]});
+
+    trans.draggable({axis: "x", containment: [limitX0 - trans.width()/2, limitY0,
+                                              limitX0 + transLimit, limitY0]});
 }
 
 // Formatting

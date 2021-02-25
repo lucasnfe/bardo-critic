@@ -63,66 +63,76 @@
 
         <form id="evaluate-form" class="needs-validation" action="" method="GET">
 
-          <div class="card bg-white border rounded">
+          <div class="card bg-white borderrounded">
               <div class="card-body mx-2">
                 <small>
-                    <h6 id="piece-title">Piece #piece_number <sup class="required">*</sup></h6>
 
-                    <div class="row align-items-center">
-                      <!-- Controls -->
-                      <div class="col-1">
-                          <button id="playButton" type="button" class="btn btn-light btn-sm" data-toggle="popover" data-trigger="manual"  data-content="Make sure to listen to the piece entirely at least once." data-placement="bottom" onclick="onPlayButtonPlayed()">
-                              <img id="playButtonImg" src="{{ url_for('static', filename='imgs/play-64x64.png') }}" class="img-fluid">
-                              <span id="loadingSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                          </button>
-                      </div>
+                <h6 id="piece-title">Piece #piece_number <sup class="required">*</sup></h6>
 
-                      <!-- Progres bar -->
-                      <div class="col-8">
-                        <div id="emotion-slider">
-                          <div id="emotion-slider-thumb"></div>
-                          <div id="emotion-track-left" class="emotion-track"></div>
-                          <div id="emotion-track-right" class="emotion-track"></div>
+                <div class="container">
+
+                    <div class="row align-items-top d-flex justify-content-center">
+                        <!-- Controls -->
+                        <div class="col-1 d-flex justify-content-center">
+                            <button id="playButton" type="button" class="btn btn-light btn-sm" data-toggle="popover" data-trigger="manual"  data-content="Make sure to listen to the piece entirely at least once." data-placement="bottom" onclick="onPlayButtonPlayed()">
+                                <img id="playButtonImg" src="{{ url_for('static', filename='imgs/play-64x64.png') }}" class="img-fluid">
+                                <span id="loadingSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            </button>
                         </div>
-                      </div>
 
-                      <!-- Timer -->
-                      <div class="col-2">
-                          <div id="timer">0:00</div>
-                      </div>
+                          <!-- Progres bar -->
+                          <div class="col d-flex justify-content-center">
+                              <div class="container">
+                                  <div class="row align-items-center d-flex justify-content-center">
+
+                                      <!-- Timer -->
+                                      <div class="col-1 d-flex justify-content-center">
+                                          <div id="timer">0:00</div>
+                                      </div>
+
+                                      <div class="col d-flex justify-content-center">
+                                          <div id="emotion-slider">
+                                            <div id="emotion-slider-thumb"></div>
+                                            <div id="emotion-trans-timer">0:00</div>
+                                            <div id="emotion-trans-slider-thumb"></div>
+                                            <div id="emotion-track-left" class="emotion-track"></div>
+                                            <div id="emotion-track-right" class="emotion-track"></div>
+                                          </div>
+                                      </div>
+
+                                      <!-- Duration -->
+                                      <div class="col-1 d-flex justify-content-center">
+                                          <div id="duration">0:00</div>
+                                      </div>
+                                  </div>
+
+                                  <div class="row d-flex justify-content-center">
+                                      <!-- Progres bar -->
+                                      <div class="col d-flex justify-content-center">
+                                          <select name="emotion1_{{piece_number}}" id="emotion1" class="selectpicker form-control" data-dropup-auto="false" data-width="120px" data-style="btn-transparent" required>
+                                              <option value="" selected="selected" disabled="disabled">Emotion 1</option>
+                                              <option data-content="<span class='badge op-calm'>Calm</span>" class="op" value="1">Calm</option>
+                                              <option data-content="<span class='badge op-agitated'>Agitated</span>" class="op" value="2">Agitated</option>
+                                              <option data-content="<span class='badge op-happy'>Happy</span>" class="op" value="3">Happy</option>
+                                              <option data-content="<span class='badge op-suspense'>Suspense</span>" class="op" value="4">Suspense</option>
+                                          </select>
+                                      </div>
+                                      <div class="col d-flex justify-content-center">
+                                          <select name="emotion2_{{piece_number}}" id="emotion2" class="selectpicker form-control" data-dropup-auto="false" data-width="120px" data-style="btn-transparent" required>
+                                              <option  value="" selected="selected" disabled="disabled">Emotion 2</option>
+                                              <option data-content="<span class='badge op-calm'>Calm</span>" class="op" value="1">Calm</option>
+                                              <option data-content="<span class='badge op-agitated'>Agitated</span>" class="op" value="2">Agitated</option>
+                                              <option data-content="<span class='badge op-happy'>Happy</span>" class="op" value="3">Happy</option>
+                                              <option data-content="<span class='badge op-suspense'>Suspense</span>" class="op" value="4">Suspense</option>
+                                          </select>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-1">
-                            <!-- <div>Emotion Transition:</div> -->
-                        </div>
 
-                        <!-- Progres bar -->
-                        <div class="col-8">
-                            <div class="row align-items-center text-center">
-                                <div class="col">
-                                    <select name="emotion1_{{piece_number}}" id="emotion1" class="selectpicker form-control" data-dropup-auto="false" data-width="120px" data-style="btn-transparent" required>
-                                        <option value="" selected="selected" disabled="disabled">Emotion 1</option>
-                                        <option data-content="<span class='badge op-calm'>Calm</span>" class="op" value="1">Calm</option>
-                                        <option data-content="<span class='badge op-agitated'>Agitated</span>" class="op" value="2">Agitated</option>
-                                        <option data-content="<span class='badge op-happy'>Happy</span>" class="op" value="3">Happy</option>
-                                        <option data-content="<span class='badge op-suspense'>Suspense</span>" class="op" value="4">Suspense</option>
-                                    </select>
-                                </div>
-                                <div class="col">
-                                    <select name="emotion2_{{piece_number}}" id="emotion2" class="selectpicker" data-dropup-auto="false" data-width="120px" data-style="btn-transparent" required>
-                                        <option  value="" selected="selected" disabled="disabled">Emotion 2</option>
-                                        <option data-content="<span class='badge op-calm'>Calm</span>" class="op" value="1">Calm</option>
-                                        <option data-content="<span class='badge op-agitated'>Agitated</span>" class="op" value="2">Agitated</option>
-                                        <option data-content="<span class='badge op-happy'>Happy</span>" class="op" value="3">Happy</option>
-                                        <option data-content="<span class='badge op-suspense'>Suspense</span>" class="op" value="4">Suspense</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-2"></div>
-                    </div>
+                </div>
                 </small>
               </div>
           </div>
@@ -136,30 +146,37 @@
                       Evaluate the quality of the composition and not the quality of the audio/performance.
                   </label>
 
-                  <div class="btn-toolbar" role="toolbar" >
-                    <div class="btn-group" role="group" >
-                      <a class="btn btn-link disabled" disabled>Very bad</a>
-                      <div class="form-check form-check-inline">
-                        <input class="evaluate-quality form-check-input" type="radio" name="quality_{{piece_number}}" value="1" required>
-                        <label class="form-check-label" for="inlineRadio1">1</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="evaluate-quality form-check-input" type="radio" name="quality_{{piece_number}}" value="2" required>
-                        <label class="form-check-label" for="inlineRadio2">2</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="evaluate-quality form-check-input" type="radio" name="quality_{{piece_number}}" value="3" required>
-                        <label class="form-check-label" for="6">3</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="evaluate-quality form-check-input" type="radio" name="quality_{{piece_number}}" value="4" required>
-                        <label class="form-check-label" for="inlineRadio3">4</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="evaluate-quality form-check-input" type="radio" name="quality_{{piece_number}}" value="5" required>
-                        <label class="form-check-label" for="inlineRadio3">5</label>
-                      </div>
-                      <a class="btn btn-link disabled" disabled>Very good</a>
+                  <div class="container">
+                      <div class="row align-items-center">
+                          <!-- Controls -->
+                          <div class="col d-flex justify-content-center">
+                              <div class="btn-toolbar" role="toolbar" >
+                                <div class="btn-group" role="group" >
+                                  <a class="btn btn-link disabled" disabled>Very bad</a>
+                                  <div class="form-check form-check-inline">
+                                    <input class="evaluate-quality form-check-input" type="radio" name="quality_{{piece_number}}" value="1" required>
+                                    <label class="form-check-label" for="inlineRadio1">1</label>
+                                  </div>
+                                  <div class="form-check form-check-inline">
+                                    <input class="evaluate-quality form-check-input" type="radio" name="quality_{{piece_number}}" value="2" required>
+                                    <label class="form-check-label" for="inlineRadio2">2</label>
+                                  </div>
+                                  <div class="form-check form-check-inline">
+                                    <input class="evaluate-quality form-check-input" type="radio" name="quality_{{piece_number}}" value="3" required>
+                                    <label class="form-check-label" for="6">3</label>
+                                  </div>
+                                  <div class="form-check form-check-inline">
+                                    <input class="evaluate-quality form-check-input" type="radio" name="quality_{{piece_number}}" value="4" required>
+                                    <label class="form-check-label" for="inlineRadio3">4</label>
+                                  </div>
+                                  <div class="form-check form-check-inline">
+                                    <input class="evaluate-quality form-check-input" type="radio" name="quality_{{piece_number}}" value="5" required>
+                                    <label class="form-check-label" for="inlineRadio3">5</label>
+                                  </div>
+                                  <a class="btn btn-link disabled" disabled>Very good</a>
+                                </div>
+                              </div>
+                        </div>
                     </div>
                   </div>
                 </small>
@@ -314,7 +331,7 @@
           localStorage.setItem(emotion1Key, $("#emotion1").val());
           localStorage.setItem(emotion2Key, $("#emotion2").val());
           localStorage.setItem(qualityKey, $('[name="' + qualityKey + '"]:checked').val());
-          localStorage.setItem(pKey, thumbSavedPos);
+          localStorage.setItem(pKey, transPos);
           localStorage.setItem(playCountKey, playCount);
           localStorage.setItem(playCompleteCountKey, playCompleteCount);
       });

@@ -13,6 +13,10 @@
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/player.css') }}" rel="stylesheet">
 
+    {% if tutorial == 1 %}
+    <link href="{{ url_for('static', filename='css/tutorial.css') }}" rel="stylesheet">
+    {% endif %}
+
     <!-- Load external libs -->
     <script src="{{ url_for('static', filename='js/lib/howler.js') }}"></script>
 
@@ -39,21 +43,61 @@
 
       <div class="p-1"></div>
 
+      {% if tutorial == 1 %}
+      <div class="card bg-white text-dark border rounded">
+          <div class="card-header border-0 bg-primary"></div>
+
+          <div class="card-body mx-2">
+            <h6 id="tutorial">This is a tutorial for you to learn how to evaluate the emotion transitions in the pieces.</h6>
+          </div>
+      </div>
+
+      <div class="p-1"></div>
+      {% endif %}
+
       <div class="card bg-white border rounded">
           <div class="card-body mx-2">
             <small>
 
-              <h6 id="piece-intro">Piece #piece_number has a transition from one emotion to another.
+              <h6 id="piece-intro">#piece_title has a transition from one emotion to another.
               Listen to this piece and select the emotion transition you perceive:</h6>
 
               <ol class="mx-2 p-2">
+                  {% if tutorial == 1 %}
+                  <li class="lesson-1 highlighted-text">Press the "Play" button to listen to the piece (listen until the end). </li>
+                  {% else %}
                   <li>Press the "Play" button to listen to the piece (listen until the end). </li>
+                  {% endif %}
+
+                  {% if tutorial == 1 %}
+                  <li class="lesson-2 hidden-text">With the audio paused:</li>
+                  {% else %}
                   <li>With the audio paused:</li>
+                  {% endif %}
+
                   <ul class="mx-3 px-1">
-                    <li>Drag and drop the slider to (or click on) the location where you perceived the emotion transition.</li>
+                    {% if tutorial == 1 %}
+                    <li class="lesson-2 hidden-text">Drag and drop the slider to the location where you perceived the emotion transition.</li>
+                    {% else %}
+                    <li>Drag and drop the slider to the location where you perceived the emotion transition.</li>
+                    {% endif %}
+
+                    {% if tutorial == 1 %}
+                    <li class="lesson-3 hidden-text">Select the emotions you perceived in each part. If you don't perceived an emotion transition, select the same emotion in both parts.</li>
+                    {% else %}
                     <li>Select the emotions you perceived in each part. If you don't perceived an emotion transition, select the same emotion in both parts.</li>
+                    {% endif %}
                   </ul>
-                  <li>Rewind the audio and repeat steps 1. and 2. until the emotion transition is in the desired location.</li>
+
+                  {% if tutorial == 1 %}
+                  <li class="lesson-final hidden-text">Repeat steps 1. and 2. until the emotion transition is in the desired location.</li>
+                  {% else %}
+                  <li>Repeat steps 1. and 2. until the emotion transition is in the desired location.</li>
+                  {% endif %}
+
+                  {% if tutorial == 1 %}
+                  <span class="lesson-final hidden-text"><strong>This particular piece has a transition from <span class='badge op-calm'>Calm</span> to <span class='badge op-agitated'>Agitated</span> at <mark>0:05</mark>.</span></strong>
+                  {% endif %}
               </ol>
             </small>
           </div>
@@ -67,14 +111,19 @@
               <div class="card-body mx-2">
                 <small>
 
-                <h6 id="piece-title">Piece #piece_number <sup class="required">*</sup></h6>
+                <h6 id="piece-title" data-toggle="popover" data-trigger="manual"  data-content="Make sure your emotion evaluation has a transition from Calm to Agitated at 0:05." data-placement="top">#piece_title <sup class="required">*</sup></h6>
 
                 <div class="container">
 
                     <div class="row align-items-top d-flex justify-content-center">
                         <!-- Controls -->
                         <div class="col-1 d-flex justify-content-center">
-                            <button id="playButton" type="button" class="btn btn-light btn-sm" data-toggle="popover" data-trigger="manual"  data-content="Make sure to listen to the piece entirely at least once." data-placement="bottom" onclick="onPlayButtonPlayed()">
+                            {% if tutorial == 1 %}
+                                <button id="playButton" type="button" class="lesson-1 highlighted-text btn btn-light btn-sm" data-toggle="popover" data-trigger="manual"  data-content='1. Press the "Play" button to listen to the piece (listen until the end).' data-placement="top" onclick="onPlayButtonPlayed(); lesson1End();">
+                            {% else %}
+                                <button id="playButton" type="button" class="btn btn-light btn-sm" data-toggle="popover" data-trigger="manual"  data-content="Make sure to listen to the piece entirely at least once." data-placement="bottom" onclick="onPlayButtonPlayed()">
+                            {% endif %}
+
                                 <img id="playButtonImg" src="{{ url_for('static', filename='imgs/play-64x64.png') }}" class="img-fluid">
                                 <span id="loadingSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             </button>
@@ -93,8 +142,15 @@
                                       <div class="col d-flex justify-content-center">
                                           <div id="emotion-slider">
                                             <div id="emotion-slider-thumb"></div>
+
+                                            {% if tutorial == 1 %}
+                                            <div id="emotion-trans-timer" class="lesson-2 hidden-text">0:00</div>
+                                            <div id="emotion-trans-slider-thumb" class="lesson-2 hidden-text" data-toggle="popover" data-trigger="manual"  data-content='2.1 Drag and drop the slider to the location where you perceived the emotion transition.' data-placement="top"></div>
+                                            {% else %}
                                             <div id="emotion-trans-timer">0:00</div>
                                             <div id="emotion-trans-slider-thumb"></div>
+                                            {% endif %}
+
                                             <div id="emotion-track-left" class="emotion-track"></div>
                                             <div id="emotion-track-right" class="emotion-track"></div>
                                           </div>
@@ -109,7 +165,11 @@
                                   <div class="row d-flex justify-content-center">
                                       <!-- Progres bar -->
                                       <div class="col d-flex justify-content-center">
+                                          {% if tutorial == 1 %}
+                                          <select name="emotion1_{{piece_number}}" id="emotion1" class="lesson-3 hidden-text selectpicker form-control" data-dropup-auto="false" data-width="120px" data-style="btn-transparent" data-toggle="popover" data-trigger="manual"  data-content="2.2 Select the emotions you perceived in each part. If you don't perceived an emotion transition, select the same emotion in both parts." data-placement="bottom" required>
+                                          {% else %}
                                           <select name="emotion1_{{piece_number}}" id="emotion1" class="selectpicker form-control" data-dropup-auto="false" data-width="120px" data-style="btn-transparent" required>
+                                          {% endif %}
                                               <option value="" selected="selected" disabled="disabled">Emotion 1</option>
                                               <option data-content="<span class='badge op-calm'>Calm</span>" class="op" value="1">Calm</option>
                                               <option data-content="<span class='badge op-agitated'>Agitated</span>" class="op" value="2">Agitated</option>
@@ -118,7 +178,11 @@
                                           </select>
                                       </div>
                                       <div class="col d-flex justify-content-center">
+                                          {% if tutorial == 1 %}
+                                          <select name="emotion2_{{piece_number}}" id="emotion2" class="lesson-3 hidden-text selectpicker form-control" data-dropup-auto="false" data-width="120px" data-style="btn-transparent" data-toggle="popover" data-trigger="manual"  data-content="2.2 Select the emotions you perceived in each part. If you don't perceived an emotion transition, select the same emotion in both parts." data-placement="bottom" required>
+                                          {% else %}
                                           <select name="emotion2_{{piece_number}}" id="emotion2" class="selectpicker form-control" data-dropup-auto="false" data-width="120px" data-style="btn-transparent" required>
+                                          {% endif %}
                                               <option  value="" selected="selected" disabled="disabled">Emotion 2</option>
                                               <option data-content="<span class='badge op-calm'>Calm</span>" class="op" value="1">Calm</option>
                                               <option data-content="<span class='badge op-agitated'>Agitated</span>" class="op" value="2">Agitated</option>
@@ -137,13 +201,14 @@
               </div>
           </div>
 
+          {% if tutorial == 0 %}
           <div class="p-1"></div>
 
           <div class="card bg-white border rounded">
               <div class="card-body mx-2">
                 <small>
                   <label for="quality_{{piece_number}}"><h6>How good does this piece sound? <sup class="required">*</sup></h6>
-                      Evaluate the quality of the composition and not the quality of the audio/performance.
+                      Evaluate the quality of the composition and not the quality of the audio.
                   </label>
 
                   <div class="container">
@@ -182,11 +247,17 @@
                 </small>
               </div>
           </div>
+          {% endif %}
 
           <div class="row align-items-center mt-2 mb-2">
             <div class="col-4">
                 <button id="prevButton" type="button" class="btn-page btn border rounded bg-white" onclick="onBack()">Back</button>
+
+                {% if tutorial == 1 %}
+                <button id="nextButton" type="button" class="btn-page btn border bg-white rounded" onclick="onNext()">Next</button>
+                {% else %}
                 <button id="nextButton" type="submit" class="btn-page btn border bg-white rounded">Next</button>
+                {% endif %}
             </div>
 
             <div class="col">
@@ -211,11 +282,15 @@
   <!-- Load player js -->
   <script src="{{ url_for('static', filename='js/evaluate.js') }}"></script>
 
+  {% if tutorial == 1 %}
+    <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
+  {% endif %}
+
   <script>
-      let emotion1Key = "emotion1_" + {{piece_number}};
-      let emotion2Key = "emotion2_" + {{piece_number}};
-      let qualityKey = "quality_" + {{piece_number}};
       let pKey = "p_" + {{piece_number}};
+      let emotion1Key  = "emotion1_" + {{piece_number}};
+      let emotion2Key  = "emotion2_" + {{piece_number}};
+      let qualityKey   = "quality_" + {{piece_number}};
       let playCountKey = "playCount_" + {{piece_number}};
       let playCompleteCountKey = "playCompleteCount_" + {{piece_number}};
 
@@ -243,8 +318,11 @@
       function loadEmotionSlider() {
           let pValue = localStorage.getItem(pKey);
           if(pValue != null) {
-              updateProgressBar(parseFloat(pValue));
-              onEmotionButtonPlayed();
+              updateTrans(parseFloat(pValue));
+
+              {% if tutorial == 1 %}
+                completeTutorial();
+              {% endif %}
           }
       }
 
@@ -268,20 +346,33 @@
       }
 
       function loadPieceTitle() {
-          let piece_ix = parseInt(localStorage.getItem("next_piece"));
-
           let pieceIntro = document.getElementById("piece-intro");
-          pieceIntro.innerHTML = pieceIntro.innerHTML.replace("#piece_number", piece_ix);
-
           let pieceTitle = document.getElementById("piece-title");
-          pieceTitle.innerHTML = pieceTitle.innerHTML.replace("#piece_number", piece_ix);
+
+          {% if tutorial == 1 %}
+            pieceIntro.innerHTML = pieceIntro.innerHTML.replace("#piece_title", "This piece");
+            pieceTitle.innerHTML = pieceTitle.innerHTML.replace("#piece_title", "Piece Tutorial");
+          {% else %}
+            let piece_ix = parseInt(localStorage.getItem("next_piece"));
+
+            pieceIntro.innerHTML = pieceIntro.innerHTML.replace("#piece_title", "Piece " + piece_ix);
+            pieceTitle.innerHTML = pieceTitle.innerHTML.replace("#piece_title", "Piece " + piece_ix);
+          {% endif %}
       }
 
       function loadFormAction() {
           let totalPieces = {{ total_pieces }};
 
           // Set the form action
-          let piece_ix = parseInt(localStorage.getItem("next_piece"));
+          {% if tutorial == 1 %}
+            let piece_ix = 0;
+
+            // Start next_piece variable in local storage
+            localStorage.setItem("next_piece", 0);
+          {% else %}
+            let piece_ix = parseInt(localStorage.getItem("next_piece"));
+          {% endif %}
+
           let piece_number = localStorage.getItem("piece" + (piece_ix + 1));
 
           if(piece_ix < totalPieces - 1) {
@@ -335,5 +426,52 @@
           localStorage.setItem(playCountKey, playCount);
           localStorage.setItem(playCompleteCountKey, playCompleteCount);
       });
+
+      function onEvaluateLoad() {
+          onResize();
+          loadPlayCount();
+          loadFormAction();
+          loadPieceTitle();
+          loadPagingProgress();
+
+          // Disable play button until sound has been loaded
+          $("#playButton").prop("disabled", true);
+
+          // Howl object
+          sound = new Howl({
+            src: [getHowlerAudio()],
+            html5: true,
+            onload: function() {
+                onResize();
+
+                updateProgressBar(0.0);
+                updateTimer(durationTimer, 1.0);
+
+                $("#loadingSpinner").css("visibility", "hidden");
+                $("#playButtonImg").css("display", "inline");
+                $("#playButton" ).prop("disabled", false);
+
+                loadStoredEvaluation();
+            },
+            onplay: function() {
+                playCount += 1;
+                requestAnimationFrame(step);
+            },
+            onend: function() {
+                if(playCompleteCount == 0) {
+                  updateTrans(0.5);
+                }
+
+                playCompleteCount += 1;
+
+                updateProgressBar(0.0);
+                pause();
+
+                {% if tutorial == 1 %}
+                lesson2Start();
+                {% endif %}
+            }
+          });
+      }
   </script>
 </html>

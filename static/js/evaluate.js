@@ -25,6 +25,9 @@ const rightTrack = $('#emotion-track-right');
 
 const qualityLikert = $(".evaluate-quality");
 
+const emotion1Select = $('#emotion1');
+const emotion2Select = $('#emotion2');
+
 thumb.on("mousedown", function(ev) {
     thumbDown();
 });
@@ -93,7 +96,7 @@ rightTrack.on("mousedown", function(ev) {
     trackDown(ev);
 });
 
-$('#emotion1').on('hide.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+emotion1Select.on('hide.bs.select', function () {
     if(playCompleteCount == 0) {
         $(this).val("");
         $(this).change();
@@ -109,7 +112,11 @@ $('#emotion1').on('hide.bs.select', function (e, clickedIndex, isSelected, previ
     }
 });
 
-$('#emotion2').on('hide.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+emotion1Select.on('show.bs.select', function () {
+    $(this).popover('hide');
+});
+
+emotion2Select.on('hide.bs.select', function () {
     if(playCompleteCount == 0) {
         $(this).val("");
         $(this).change();
@@ -123,18 +130,27 @@ $('#emotion2').on('hide.bs.select', function (e, clickedIndex, isSelected, previ
     else {
         onEmotionButtonPlayed();
     }
+});
+
+emotion2Select.on('show.bs.select', function () {
+    $(this).popover('hide');
 });
 
 function transDown() {
+    $("#emotion-trans-slider-thumb").popover('hide');
+
     if(sound.state() != "loaded") {
         return;
     }
 
     didClickOnTrans = true;
+
+    // Hide trans timer
+    transTimer.css("visibility", "visible");
 }
 
 function thumbDown() {
-    if(sound.state() != "loaded") {
+    if(sound == null || sound.state() != "loaded") {
         return;
     }
 
@@ -143,7 +159,7 @@ function thumbDown() {
 }
 
 function transMove(clientX) {
-    if(sound.state() != "loaded") {
+    if(sound == null || sound.state() != "loaded") {
         return;
     }
 
@@ -153,12 +169,11 @@ function transMove(clientX) {
 
         // Update thumb position
         updateTrans(p);
-        transTimer.css("visibility", "visible");
     }
 }
 
 function thumbMove(clientX) {
-    if(sound.state() != "loaded") {
+    if(sound == null || sound.state() != "loaded") {
         return;
     }
 
@@ -172,7 +187,7 @@ function thumbMove(clientX) {
 }
 
 function transUp() {
-    if(sound.state() != "loaded") {
+    if(sound == null || sound.state() != "loaded") {
         return;
     }
 
@@ -183,7 +198,7 @@ function transUp() {
 }
 
 function thumbUp() {
-    if(sound.state() != "loaded") {
+    if(sound == null || sound.state() != "loaded") {
         return;
     }
 
@@ -191,7 +206,7 @@ function thumbUp() {
 }
 
 function trackDown(ev) {
-    if(sound.state() != "loaded") {
+    if(sound == null || sound.state() != "loaded") {
         return;
     }
 
@@ -329,50 +344,6 @@ function updateProgressBar(p) {
 
     // Update timer
     updateTimer(elapsedTimer, thumbPos);
-}
-
-function onEvaluateLoad() {
-    onResize();
-    loadPlayCount();
-    loadFormAction();
-    loadPieceTitle();
-    loadPagingProgress();
-
-    // Disable play button until sound has been loaded
-    $("#playButton").prop("disabled", true);
-
-    // Howl object
-    sound = new Howl({
-      src: [getHowlerAudio()],
-      html5: true,
-      onload: function() {
-          onResize();
-
-          updateTimer(durationTimer, 1.0);
-
-          $("#loadingSpinner").css("visibility", "hidden");
-          $("#playButtonImg").css("display", "inline");
-          $("#playButton" ).prop("disabled", false);
-
-          loadStoredEvaluation();
-      },
-      onplay: function() {
-          playCount += 1;
-          requestAnimationFrame(step);
-      },
-      onend: function() {
-          if(playCompleteCount == 0) {
-            updateTrans(0.5);
-          }
-
-          playCompleteCount += 1;
-
-          updateEmotionSlider(transPos);
-          updateProgressBar(0.0);
-
-          pause();
-      }
-    });
 }
 
 function calcMidPoint(x, width, limit) {

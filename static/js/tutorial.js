@@ -2,16 +2,16 @@ const LessonState = {"open": 0, "started": 1, "completed": 2}
 
 let lessons = [LessonState.started, LessonState.open, LessonState.open]
 
-thumb.on("mousedown", function(ev) {
+trans.on("mousedown", function(ev) {
     lesson2End();
 });
 
-thumb.on("touchstart", function(ev) {
+trans.on("touchstart", function(ev) {
     lesson2End();
 });
 
-slider.on("mousedown", function(ev) {
-    lesson2End();
+$(document).on("mousedown", function(ev) {
+    $("#piece-title").popover('hide');
 });
 
 $(document).on("mouseup", function(ev) {
@@ -172,6 +172,18 @@ function lessonFinal() {
     document.getElementById("nextButton").disabled = false;
 }
 
+function completeTutorial() {
+    lesson1End();
+
+    lesson2Start();
+    lesson2End();
+
+    lesson3Start();
+    lesson3End();
+
+    lessonFinal();
+}
+
 function onNext() {
     let tutorialHelp = document.getElementById("tutorial-help");
     let tutorialModalLabel = document.getElementById("tutorialModalLabel");
@@ -182,40 +194,37 @@ function onNext() {
     if((lessons[0] == LessonState.started || lessons[0] == LessonState.completed) &&
         lessons[1] == LessonState.open    && lessons[2] == LessonState.open) {
 
-           tutorialModalLabel.innerHTML = 'Step 1';
-           tutorialHelp.innerHTML = 'Press the "Play" button to listen to the piece (listen until the end).';
-
-           $("#tutorialModal").modal();
+            // Show play popover
+            $("#playButton").popover('show');
     }
 
     if(lessons[0] == LessonState.completed && lessons[1] == LessonState.started &&
        lessons[2] == LessonState.open) {
 
-           tutorialModalLabel.innerHTML = 'Step 2.1';
-           tutorialHelp.innerHTML = 'With the audio paused: drag and drop the slider to (or click on) the location where you perceived the emotion transition.';
-
-           $("#tutorialModal").modal();
+           // Show play popover
+           $("#emotion-trans-slider-thumb").popover('show');
     }
 
     if(lessons[0] == LessonState.completed && lessons[1] == LessonState.completed &&
        lessons[2] == LessonState.started) {
 
-           tutorialModalLabel.innerHTML = 'Step 2.2';
-           tutorialHelp.innerHTML = "With the audio paused: select the emotions you perceived in each part. If you don't perceived an emotion transition, select the same emotion in both parts.";
-
-           $("#tutorialModal").modal();
+           // Show play popover
+           if(emotion1.value == "") {
+                $("#emotion1").popover('show');
+           }
+           else if(emotion2.value == "") {
+                $("#emotion2").popover('show');
+           }
     }
 
     if(lessons[0] == LessonState.completed && lessons[1] == LessonState.completed &&
        lessons[2] == LessonState.completed) {
 
-           let tutorialSelectedTime = Math.round(thumbSavedPos * sound.duration());
+           let tutorialSelectedTime = Math.round(transPos * sound.duration());
 
            if(emotion1.value != "1" || emotion2.value != "2" || tutorialSelectedTime != 5) {
-               tutorialModalLabel.innerHTML = 'Step 3';
-               tutorialHelp.innerHTML = "Make sure the piece piece has a transition from <span class='badge op-calm'>Calm</span> to <span class='badge op-agitated'>Agitated</span> at <mark>0:05</mark>.</span>";
 
-               $("#tutorialModal").modal();
+               $("#piece-title").popover('show');
            }
            else {
                $("#evaluate-form").submit();

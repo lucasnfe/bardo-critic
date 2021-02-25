@@ -39,16 +39,18 @@ def index():
 
 @app.route('/tutorial')
 def tutorial():
-    return render_template('tutorial.html', piece_number=0,
+    return render_template('evaluate.html', piece_number=0,
                                               piece_name=pieces[0],
-                                            total_pieces=len(pieces))
+                                            total_pieces=len(pieces),
+                                                tutorial=1)
 
 @app.route('/evaluate/<int:piece_number>')
 def evaluate(piece_number):
     if piece_number > 0 and piece_number < len(pieces):
         return render_template('evaluate.html', piece_number=piece_number,
                                                   piece_name=pieces[piece_number],
-                                                total_pieces=len(pieces))
+                                                total_pieces=len(pieces),
+                                                    tutorial=0)
     else:
         abort(404)
 

@@ -49,7 +49,7 @@
 
       <div class="p-1"></div>
 
-      <form id="profile-form" class="needs-validation" action="http://localhost:5000/end" method="GET">
+      <form id="profile-form" class="needs-validation" action="http://{{ sever_name }}/end" method="GET">
           <div class="card bg-white border rounded">
               <div class="card-body mx-2">
                 <small>
@@ -323,7 +323,7 @@
               <div class="card-body mx-2">
                 <small>
                     <label for="xp"><h6>What is your experience as a musician? <sup class="required">*</sup></h6></label>
-                    <div class="btn-toolbar" role="toolbar" >
+                    <div class="btn-toolbar d-flex justify-content-center" role="toolbar" >
                       <div class="btn-group" role="group" >
                         <a class="btn btn-link disabled" disabled>I have never studied or practiced music.</a>
                         <div class="form-check form-check-inline">

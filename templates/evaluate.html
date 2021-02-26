@@ -361,25 +361,18 @@
       }
 
       function loadFormAction() {
-          let totalPieces = {{ total_pieces }};
-
           // Set the form action
-          {% if tutorial == 1 %}
-            let piece_ix = 0;
+          let evaluateForm = document.getElementById("evaluate-form");
 
-            // Start next_piece variable in local storage
-            localStorage.setItem("next_piece", 0);
-          {% else %}
-            let piece_ix = parseInt(localStorage.getItem("next_piece"));
-          {% endif %}
+          // Get next piece
+          let nextPieceIx = parseInt(localStorage.getItem("next_piece")) + 1;
 
-          let piece_number = localStorage.getItem("piece" + (piece_ix + 1));
-
-          if(piece_ix < totalPieces - 1) {
-              document.getElementById("evaluate-form").action = "http://localhost:5000/evaluate/" + piece_number;
+          if(nextPieceIx < {{ total_pieces }}) {
+              let nextPieceValue = localStorage.getItem("piece" + nextPieceIx);
+              evaluateForm.action = "http://{{ sever_name }}/evaluate/" + nextPieceValue;
           }
           else {
-              document.getElementById("evaluate-form").action = "http://localhost:5000/profile";
+              evaluateForm.action = "http://{{ sever_name }}/profile";
           }
       }
 
